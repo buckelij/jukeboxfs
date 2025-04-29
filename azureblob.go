@@ -33,18 +33,24 @@ type BlobReader struct {
 	bufEnd    *int64
 }
 
+// XXX return struct not interface
 func NewBlobClient(account string, key string) (BlobClient, error) {
 	if account == "" || key == "" {
-		return &azureBlobClient{}, fmt.Errorf("account and key may not be empty")
+		return nil, fmt.Errorf("account and key may not be empty")
 	}
 	cred, err := azblob.NewSharedKeyCredential(account, key)
 	if err != nil {
-		return &azureBlobClient{}, err
+		return nil, err
 	}
-
-	c, err := azblob.NewClientWithSharedKeyCredential(fmt.Sprintf("https://%s.blob.core.windows.net/", account), cred, nil)
+	var serviceUrl string
+	if account == "devstoreaccount1" {
+		serviceUrl = "http://127.0.0.1:10000/devstoreaccount1"
+	} else {
+		serviceUrl = fmt.Sprintf("https://%s.blob.core.windows.net/", account)
+	}
+	c, err := azblob.NewClientWithSharedKeyCredential(serviceUrl, cred, nil)
 	if err != nil {
-		return &azureBlobClient{}, nil
+		return nil, nil
 	}
 
 	return &azureBlobClient{c}, err

@@ -1,3 +1,5 @@
+// docker run -p 10000:10000 mcr.microsoft.com/azure-storage/azurite azurite-blob --blobHost 0.0.0.0
+// BLOB_ACCOUNT=devstoreaccount1 BLOB_KEY=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw== go run .
 package main
 
 import (
@@ -7,7 +9,6 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"strings"
 	"sync"
 )
 
@@ -33,9 +34,9 @@ func main() {
 	blobreader := BlobReader{
 		client:    c,
 		mu:        new(sync.Mutex),
-		container: "data",
+		container: "test",
 		blobname:  "content.zip",
-		blobsize:  84723573,
+		blobsize:  581,
 		bufStart:  new(int64),
 		bufEnd:    new(int64),
 		buffer:    make([]byte, 16*1024*1024), // DefaultDownloadBlockSize is 4mb so 16/4 goroutines
@@ -54,15 +55,15 @@ func main() {
 			continue
 		}
 
-		dst, _ := os.Create("/tmp/" + strings.Replace(f.Name, "/", "_", -1))
-		defer dst.Close()
+		// dst, _ := os.Create("/tmp/" + strings.Replace(f.Name, "/", "_", -1))
+		// defer dst.Close()
 
 		rc, err := f.Open()
 		if err != nil {
 			log.Fatal(err)
 		}
-		// _, err = io.Copy(os.Stdout, rc)
-		_, err = io.Copy(dst, rc)
+		_, err = io.Copy(os.Stdout, rc)
+		// _, err = io.Copy(dst, rc)
 		if err != nil {
 			log.Fatal(err)
 		}
